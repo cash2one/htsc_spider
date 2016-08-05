@@ -1,0 +1,73 @@
+# -*- coding: utf-8 -*-
+
+# Define your item pipelines here
+#
+# Don't forget to add your pipeline to the ITEM_PIPELINES setting
+# See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
+
+from XueQiu.spiders.xueqiu import XueQiuSpider
+from XueQiu.spiders.xueqiu_comment import XueQiuCommentSpider
+
+from avrotools.avro_utils import AvroUtils
+from common.config import kafka_producer
+from time import sleep
+from scrapy_redis.connection import get_redis_conn 
+
+from common.config import SpiderSourceCode,SpiderSourceName,RedisKeys,kafkaTopic
+import logging
+import shortuuid
+
+class XueqiuPipeline(object):
+    """
+    logger = logging.getLogger("htsc")
+    
+    def __init__(self):
+        self.redis_conn=get_redis_conn()
+        
+    def process_comment(self, item):
+        print "process_comment invoked"
+        ids=item["id"].split("&&")
+        item["id"] = ids[0]
+        comment_id=ids[1]
+        contents=AvroUtils.createAvroMemoryRecord(item,AvroUtils.getCommentsSchema())
+        kafka_producer.send(kafkaTopic.comments,value=contents)
+        sleep(1)
+        self.logger.info("send data to kafka, from xueqiu, username: "+item["username"])
+        get_redis_conn().zadd(RedisKeys.xueqiu_comment_crawled,str(comment_id),item['pub_date'][0:10].replace("-",""))
+        return item
+    
+    def process_article(self, item):
+        xueqiu_comment_relation=item["id"]  #user_id+"&&"+article_id+"&&"
+        item["id"]=shortuuid.uuid()
+        xueqiu_comment_relation += item["id"]  #user_id+"&&"+article_id+"&&"+uuid
+        
+        item["source"]=SpiderSourceName.xueqiu
+        item["type"]=SpiderSourceCode.xueqiu
+#<<<<<<< .mine
+        
+        contents=AvroUtils.createAvroMemoryRecord(item,AvroUtils.getNewsSchema())
+        kafka_producer.send(kafkaTopic.news,value=contents)
+        sleep(1)
+#=======
+        item["code"]=""
+        item["name"]=""
+        contents=AvroUtils.createAvroMemoryRecord(item,AvroUtils.getNewsSchema())
+        #kafka_producer.send(kafkaTopic.news,value=contents)
+        #sleep(1)
+#>>>>>>> .r366
+        self.logger.info("send data to kafka, from "+item["source"] +" , url: "+item["url"])
+        get_redis_conn().zadd(RedisKeys.xueqiu_url_crawled,item["url"],item['pub_date'][0:10].replace("-",""))
+        get_redis_conn().zadd(RedisKeys.xueqiu_comment_relation,xueqiu_comment_relation,item['pub_date'][0:10].replace("-",""))
+        
+        return item
+    
+    def process_item(self, item, spider):
+        if isinstance(spider,XueQiuSpider):
+            return self.process_article(item)
+        else:
+            return self.process_comment(item)
+        
+       """
+       
+    
+    

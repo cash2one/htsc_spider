@@ -1,0 +1,17 @@
+{"namespace": "htsc.avro",
+ "type": "record",
+ "name": "News",
+ "fields": [
+     {"name": "id",  "type": "string","default":""},
+     {"name": "crawl_ts",  "type": "string","default":""},
+     {"name": "source", "type": "string"},
+     {"name": "type", "type": "string"},
+     {"name": "pub_date", "type": "string"},
+     {"name": "batch",  "type": "int","default":1},
+     {"name": "flag",  "type": "int","default":0},
+     {"name": "rank",  "type": "int","default":0},
+     {"name": "code", "type": "string"},
+     {"name": "name",  "type": "string"},
+     {"name": "keywords",  "type": "string","default":""}     
+ ]
+}
