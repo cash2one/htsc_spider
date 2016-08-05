@@ -80,19 +80,17 @@ class XueQiuStockSpider(scrapy.Spider):
             item = NewsItem()
             
             item["title"] =result["list"][i]["title"]
+            print item["title"]
             item["content"] =result["list"][i]["text"]
-            
+            print item["content"]
             timeStamp=int(result["list"][i]["created_at"])/1000
-            print timeStamp
             timeArray =time.localtime(timeStamp)
             pub_date= time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-            print "pub_date:"+pub_date
             item['pub_date']=pub_date
             print self.endDate
-            if self.endDate is None:
-                
+            if self.endDate is None:    
                 self.endDate=time.strftime("%Y-%m-%d", time.localtime())
-            print self.endDate
+                
             if pub_date < self.endDate:
                 nextPage=False
             
